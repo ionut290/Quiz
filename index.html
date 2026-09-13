@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>QuizMix — Cultura generale</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f8fafc;background:#0b1020;line-height:1.4}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0%,#243b70 0,#111827 38%,#080b16 100%)}
+    button{font:inherit;border:0;cursor:pointer}.shell{width:min(100%,760px);margin:auto;padding:22px 16px 34px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.2px}.logo{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#22d3ee);font-size:23px;box-shadow:0 8px 26px #0005}.pill{padding:8px 12px;border-radius:999px;background:#ffffff14;color:#cbd5e1;font-size:13px}
+    .panel{background:#111827d9;border:1px solid #ffffff14;border-radius:28px;padding:24px;box-shadow:0 24px 70px #0005;backdrop-filter:blur(14px)}.hero h1{font-size:clamp(30px,8vw,48px);line-height:1.02;margin:8px 0 12px}.hero p{color:#aebbd2;margin:0 0 22px}.eyebrow{text-transform:uppercase;letter-spacing:.16em;color:#67e8f9;font-size:11px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}.category{padding:15px;border-radius:18px;background:#ffffff0d;border:1px solid #ffffff12;color:#e5e7eb;text-align:left;transition:.2s}.category:hover,.category.active{border-color:#67e8f9;background:#0e749033;transform:translateY(-2px)}.category strong{display:block;margin-top:7px}.category small{color:#94a3b8}.primary{width:100%;padding:15px 18px;border-radius:16px;background:linear-gradient(100deg,#8b5cf6,#06b6d4);color:white;font-weight:800;font-size:16px;box-shadow:0 10px 24px #0891b244}.secondary{padding:12px 15px;border-radius:14px;background:#ffffff12;color:#e2e8f0}.stats{display:flex;gap:10px;margin-top:16px}.stat{flex:1;padding:13px;border-radius:15px;background:#ffffff0a;text-align:center}.stat b{display:block;font-size:22px}.stat small{color:#94a3b8}.hidden{display:none!important}
+    .quiz-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.progress{height:8px;background:#ffffff12;border-radius:20px;overflow:hidden;margin:18px 0 24px}.progress i{display:block;height:100%;background:linear-gradient(90deg,#a78bfa,#22d3ee);border-radius:20px;transition:width .35s}.question{font-size:clamp(22px,5vw,32px);line-height:1.16;margin:0 0 22px}.answers{display:grid;gap:11px}.answer{display:flex;gap:12px;text-align:left;align-items:center;padding:15px;border:1px solid #ffffff1c;background:#ffffff0a;border-radius:16px;color:#f8fafc;transition:.18s}.answer span{display:grid;place-items:center;width:31px;height:31px;flex:0 0 31px;border-radius:10px;background:#ffffff13;color:#a5b4fc;font-weight:800}.answer:hover{background:#ffffff17;border-color:#a78bfa}.answer.correct{background:#16a34a33;border-color:#4ade80}.answer.wrong{background:#dc262633;border-color:#fb7185}.answer:disabled{cursor:default}.tip{color:#9fb0c8;font-size:13px;margin-top:15px}.result{text-align:center}.score-ring{width:145px;height:145px;margin:14px auto 20px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#22d3ee var(--score),#ffffff12 0);position:relative}.score-ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#111827}.score-ring span{position:relative;z-index:1;font-size:30px;font-weight:900}.result h2{font-size:30px;margin:0 0 8px}.result p{color:#aebbd2}.actions{display:grid;gap:10px;margin-top:24px}@media(min-width:620px){.grid{grid-template-columns:repeat(4,1fr)}.actions{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><div class="brand"><div class="logo">🧠</div><div>QuizMix<small style="display:block;color:#94a3b8;font-weight:500">Cultura generale</small></div></div><div class="pill">🏆 Record: <b id="record">0</b></div></header>
+
+    <section id="home" class="panel hero">
+      <span class="eyebrow">Sfida la tua mente</span><h1>Quanto ne sai davvero?</h1><p>Scegli una categoria, rispondi alle domande e prova a superare il tuo record.</p>
+      <div class="grid" id="categories"></div>
+      <button class="primary" id="start">Inizia la partita <span>→</span></button>
+      <div class="stats"><div class="stat"><b>10</b><small>domande</small></div><div class="stat"><b>15s</b><small>per domanda</small></div><div class="stat"><b>+100</b><small>punti max</small></div></div>
+    </section>
+
+    <section id="quiz" class="panel hidden">
+      <div class="quiz-head"><span class="pill" id="categoryLabel">🌍 Misto</span><span class="pill">⏱ <b id="timer">15</b>s</span></div>
+      <div class="progress"><i id="progress"></i></div><p class="eyebrow" id="counter">DOMANDA 1 DI 10</p><h2 class="question" id="question"></h2><div class="answers" id="answers"></div><p class="tip" id="tip">Scegli la risposta che ritieni corretta.</p>
+    </section>
+
+    <section id="result" class="panel result hidden"><span class="eyebrow">Partita terminata</span><div class="score-ring" id="scoreRing"><span id="score">0</span></div><h2 id="resultTitle">Ottimo lavoro!</h2><p id="resultText"></p><div class="actions"><button class="primary" id="again">Gioca ancora</button><button class="secondary" id="homeBtn">Torna al menu</button></div></section>
+  </main>
+  <script>
+    const questions = [
+      {c:'Storia',i:'🏛️',q:'In quale anno è caduto il Muro di Berlino?',a:['1987','1989','1991','1993'],x:1},
+      {c:'Geografia',i:'🌍',q:'Qual è il fiume più lungo d’Italia?',a:['Po','Arno','Tevere','Adige'],x:0},
+      {c:'Scienza',i:'🔬',q:'Quale pianeta è conosciuto come il Pianeta Rosso?',a:['Venere','Giove','Marte','Mercurio'],x:2},
+      {c:'Arte',i:'🎨',q:'Chi ha dipinto la Cappella Sistina?',a:['Leonardo da Vinci','Raffaello','Michelangelo','Caravaggio'],x:2},
+      {c:'Sport',i:'⚽',q:'Quanti giocatori ha una squadra di calcio in campo?',a:['9','10','11','12'],x:2},
+      {c:'Tecnologia',i:'💡',q:'Cosa significa la sigla GPS?',a:['Global Positioning System','General Phone Signal','Global Personal Service','Geo Planet System'],x:0},
+      {c:'Cinema',i:'🎬',q:'Quale film contiene il personaggio Jack Sparrow?',a:['Avatar','Pirati dei Caraibi','Titanic','Matrix'],x:1},
+      {c:'Natura',i:'🌿',q:'Qual è l’animale terrestre più veloce?',a:['Leone','Ghepardo','Antilope','Cavallo'],x:1},
+      {c:'Musica',i:'🎵',q:'Quale strumento ha normalmente 88 tasti?',a:['Violino','Pianoforte','Fisarmonica','Organo'],x:1},
+      {c:'Italia',i:'🇮🇹',q:'Qual è il capoluogo della Sicilia?',a:['Catania','Messina','Palermo','Siracusa'],x:2},
+      {c:'Storia',i:'🏛️',q:'Quale civiltà costruì il Colosseo?',a:['Greca','Romana','Egizia','Etrusca'],x:1},
+      {c:'Geografia',i:'🌍',q:'Qual è la capitale del Canada?',a:['Toronto','Vancouver','Ottawa','Montréal'],x:2},
+      {c:'Scienza',i:'🔬',q:'Qual è il simbolo chimico dell’oro?',a:['Ag','Or','Au','Go'],x:2},
+      {c:'Sport',i:'⚽',q:'In quale sport si usa una racchetta e un volano?',a:['Tennis','Badminton','Squash','Ping pong'],x:1},
+      {c:'Cultura',i:'📚',q:'Chi ha scritto “La Divina Commedia”?',a:['Dante Alighieri','Petrarca','Manzoni','Boccaccio'],x:0}
+    ];
+    const categories = [...new Set(questions.map(q=>q.c))]; let selected='Misto', round=[], index=0, score=0, correct=0, timerId=null, seconds=15, answered=false;
+    const $=id=>document.getElementById(id); const record=Number(localStorage.getItem('quizmix-record')||0); $('record').textContent=record;
+    $('categories').innerHTML = [{c:'Misto',i:'✨'},...categories.slice(0,7).map(c=>({c,i:questions.find(q=>q.c===c).i}))].map(o=>`<button class="category ${o.c==='Misto'?'active':''}" data-cat="${o.c}"><span style="font-size:24px">${o.i}</span><strong>${o.c}</strong><small>${o.c==='Misto'?'Tutto un po’':'Quiz tematico'}</small></button>`).join('');
+    document.querySelectorAll('.category').forEach(b=>b.onclick=()=>{document.querySelectorAll('.category').forEach(x=>x.classList.remove('active'));b.classList.add('active');selected=b.dataset.cat});
+    function start(){ const pool=selected==='Misto'?questions:questions.filter(q=>q.c===selected); round=[...pool].sort(()=>Math.random()-.5).slice(0,Math.min(10,pool.length)); index=0;score=0;correct=0;$('home').classList.add('hidden');$('result').classList.add('hidden');$('quiz').classList.remove('hidden');showQuestion(); }
+    function showQuestion(){ answered=false; const q=round[index]; $('categoryLabel').textContent=`${q.i} ${q.c}`;$('counter').textContent=`DOMANDA ${index+1} DI ${round.length}`;$('question').textContent=q.q;$('progress').style.width=`${index/round.length*100}%`;$('tip').textContent='Scegli la risposta che ritieni corretta.';$('answers').innerHTML=q.a.map((a,i)=>`<button class="answer" data-i="${i}"><span>${String.fromCharCode(65+i)}</span>${a}</button>`).join('');document.querySelectorAll('.answer').forEach(b=>b.onclick=()=>answer(Number(b.dataset.i))); startTimer(); }
+    function startTimer(){clearInterval(timerId);seconds=15;$('timer').textContent=seconds;timerId=setInterval(()=>{seconds--;$('timer').textContent=seconds;if(seconds<=0){clearInterval(timerId);answer(-1)}},1000)}
+    function answer(choice){if(answered)return;answered=true;clearInterval(timerId);const q=round[index], buttons=[...document.querySelectorAll('.answer')];buttons.forEach(b=>b.disabled=true);buttons[q.x].classList.add('correct');if(choice===q.x){score+=10+seconds*2;correct++;$('tip').textContent='✅ Risposta corretta!'}else{if(choice>=0)buttons[choice].classList.add('wrong');$('tip').textContent=`❌ La risposta corretta era: ${q.a[q.x]}`;}setTimeout(()=>{index++;index<round.length?showQuestion():finish()},850)}
+    function finish(){clearInterval(timerId);$('quiz').classList.add('hidden');$('result').classList.remove('hidden');$('score').textContent=score;$('scoreRing').style.setProperty('--score',`${Math.min(100,score/((round.length*40)||1)*100)}%`);$('resultTitle').textContent=correct>=8?'Fenomenale!':correct>=5?'Ottimo lavoro!':'Puoi fare ancora meglio!';$('resultText').textContent=`Hai risposto correttamente a ${correct} domande su ${round.length} e hai totalizzato ${score} punti.`;if(score>Number(localStorage.getItem('quizmix-record')||0)){localStorage.setItem('quizmix-record',score);$('record').textContent=score}}
+    $('start').onclick=start;$('again').onclick=start;$('homeBtn').onclick=()=>{$('result').classList.add('hidden');$('home').classList.remove('hidden')};
+    if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
+  </script>
+</body>
+</html>
