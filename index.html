@@ -89,14 +89,45 @@
     const categories = [...new Set(questions.map(q=>q.c))]; let selected='Misto', round=[], index=0, score=0, correct=0, timerId=null, seconds=15, answered=false;
     const $=id=>document.getElementById(id); const record=Number(localStorage.getItem('quizmix-record')||0); $('record').textContent=record;
     let books=JSON.parse(localStorage.getItem('quizmix-books')||'[]');
+    const shuffle=list=>{const copy=[...list];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy};
+    const questionId=q=>`${q.c}|${q.q}`;
+    function buildFreshRound(pool,category,size=10){
+      const limit=Math.min(size,pool.length),storageKey=`quizmix-question-history-v1:${category}`;
+      let history={seen:[],last:[]};
+      try{history={...history,...JSON.parse(localStorage.getItem(storageKey)||'{}')}}catch(error){console.info('Cronologia quiz non leggibile',error.message)}
+      const availableIds=new Set(pool.map(questionId));
+      const last=new Set((history.last||[]).filter(id=>availableIds.has(id)));
+      let seen=new Set((history.seen||[]).filter(id=>availableIds.has(id)));
+      if([...availableIds].every(id=>seen.has(id)))seen=new Set();
+
+      // Prima usa domande mai viste; tra queste preferisce quelle assenti
+      // dall'ultima partita. I doppioni recenti sono sempre l'ultima scelta.
+      const groups=[
+        pool.filter(q=>!seen.has(questionId(q))&&!last.has(questionId(q))),
+        pool.filter(q=>!seen.has(questionId(q))&&last.has(questionId(q))),
+        pool.filter(q=>seen.has(questionId(q))&&!last.has(questionId(q))),
+        pool.filter(q=>seen.has(questionId(q))&&last.has(questionId(q)))
+      ].map(shuffle);
+      const chosen=[],chosenIds=new Set();
+      groups.flat().forEach(q=>{const id=questionId(q);if(chosen.length<limit&&!chosenIds.has(id)){chosen.push(q);chosenIds.add(id)}});
+
+      // Se una categoria contiene poche domande, almeno l'ordine della nuova
+      // partita non deve essere identico a quello appena giocato.
+      if(limit>1&&chosen.map(questionId).every((id,i)=>id===(history.last||[])[i])){
+        chosen.push(chosen.shift());
+      }
+      chosen.forEach(q=>seen.add(questionId(q)));
+      localStorage.setItem(storageKey,JSON.stringify({seen:[...seen],last:chosen.map(questionId)}));
+      return chosen;
+    }
     function updateIQ(){const answeredCount=Math.max(0,index+(answered?1:0));const iq=Math.max(70,Math.min(180,100+correct*4-(answeredCount-correct)*2));$('iqValue').textContent=iq;$('iqTrack').style.width=`${Math.max(8,Math.min(100,(iq-70)/110*100))}%`;}
     function renderBooks(){ $('bookList').innerHTML=books.map((b,i)=>`<div class="book-item"><div>📖 ${b.title}<small>${b.author||'Autore non indicato'}${b.year?' · '+b.year:''}</small></div><button data-book="${i}" aria-label="Rimuovi libro">✕</button></div>`).join('');$('bookQuiz').classList.toggle('hidden',books.length===0);document.querySelectorAll('[data-book]').forEach(b=>b.onclick=()=>{books.splice(Number(b.dataset.book),1);localStorage.setItem('quizmix-books',JSON.stringify(books));renderBooks()});}
     async function enrichBook(book){try{const response=await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(book.title)}&fields=title,author_name,first_publish_year,subject,first_sentence&limit=1`);const data=await response.json();const hit=data.docs?.[0];if(hit){book.author=book.author||hit.author_name?.[0]||'';book.year=book.year||hit.first_publish_year||'';book.subject=hit.subject?.slice(0,3)||[];book.description=hit.first_sentence?.[0]||'';book.url=hit.key?`https://openlibrary.org${hit.key}`:''}}catch(error){console.info('Metadati libro non disponibili',error.message)}}
     async function saveBooks(){const lines=$('bookInput').value.split('\n').map(x=>x.trim()).filter(Boolean);const incoming=lines.map(line=>{const parts=line.split(/\s+[—–-]\s+/);return {title:parts[0].trim(),author:(parts[1]||'').trim()}});for(const book of incoming){if(!books.some(old=>old.title.toLowerCase()===book.title.toLowerCase())){await enrichBook(book);books.push(book)}}localStorage.setItem('quizmix-books',JSON.stringify(books));$('bookInput').value='';renderBooks();}
-    function buildBookQuiz(){const result=[];const allAuthors=[...new Set(books.map(b=>b.author).filter(Boolean))];const allTitles=books.map(b=>b.title);books.forEach(book=>{if(book.author){let options=[book.author,...allAuthors.filter(a=>a!==book.author)];while(options.length<4)options.push(['Dante Alighieri','J.K. Rowling','Leonardo da Vinci','Umberto Eco'][options.length-1]);options=[...new Set(options)].slice(0,4).sort(()=>Math.random()-.5);result.push({c:'I miei libri',i:'📚',q:`Chi è l’autore di “${book.title}”?`,a:options,x:options.indexOf(book.author),e:book.description||`“${book.title}” è associato all’autore ${book.author}.`,l:book.url||`https://www.google.com/search?q=${encodeURIComponent(book.title+' '+book.author)}`})}else{let options=[book.title,...allTitles.filter(t=>t!==book.title),'Il piccolo principe','1984'];options=[...new Set(options)].slice(0,4).sort(()=>Math.random()-.5);result.push({c:'I miei libri',i:'📚',q:'Quale di questi titoli hai inserito nei tuoi libri?',a:options,x:options.indexOf(book.title),e:'Questo titolo fa parte dell’elenco personale che hai importato da Audible.',l:`https://www.google.com/search?q=${encodeURIComponent(book.title)}`})}});return result.sort(()=>Math.random()-.5).slice(0,10)}
+    function buildBookQuiz(){const result=[];const allAuthors=[...new Set(books.map(b=>b.author).filter(Boolean))];const allTitles=books.map(b=>b.title);books.forEach(book=>{if(book.author){let options=[book.author,...allAuthors.filter(a=>a!==book.author)];while(options.length<4)options.push(['Dante Alighieri','J.K. Rowling','Leonardo da Vinci','Umberto Eco'][options.length-1]);options=shuffle([...new Set(options)].slice(0,4));result.push({c:'I miei libri',i:'📚',q:`Chi è l’autore di “${book.title}”?`,a:options,x:options.indexOf(book.author),e:book.description||`“${book.title}” è associato all’autore ${book.author}.`,l:book.url||`https://www.google.com/search?q=${encodeURIComponent(book.title+' '+book.author)}`})}else{let options=[book.title,...allTitles.filter(t=>t!==book.title),'Il piccolo principe','1984'];options=shuffle([...new Set(options)].slice(0,4));result.push({c:'I miei libri',i:'📚',q:'Quale di questi titoli hai inserito nei tuoi libri?',a:options,x:options.indexOf(book.title),e:'Questo titolo fa parte dell’elenco personale che hai importato da Audible.',l:`https://www.google.com/search?q=${encodeURIComponent(book.title)}`})}});return buildFreshRound(result,'I miei libri',10)}
     $('categories').innerHTML = [{c:'Misto',i:'✨'},...categories.map(c=>({c,i:questions.find(q=>q.c===c).i}))].map(o=>`<button class="category ${o.c==='Misto'?'active':''}" data-cat="${o.c}"><span style="font-size:24px">${o.i}</span><strong>${o.c}</strong><small>${o.c==='Misto'?'Tutto un po’':'Quiz tematico'}</small></button>`).join('');
     document.querySelectorAll('.category').forEach(b=>b.onclick=()=>{document.querySelectorAll('.category').forEach(x=>x.classList.remove('active'));b.classList.add('active');selected=b.dataset.cat});
-    function start(){ const pool=selected==='Misto'?questions:questions.filter(q=>q.c===selected); round=[...pool].sort(()=>Math.random()-.5).slice(0,Math.min(10,pool.length)); index=0;score=0;correct=0;updateIQ();$('home').classList.add('hidden');$('result').classList.add('hidden');$('quiz').classList.remove('hidden');showQuestion(); }
+    function start(){ const pool=selected==='Misto'?questions:questions.filter(q=>q.c===selected); round=buildFreshRound(pool,selected,10); index=0;score=0;correct=0;updateIQ();$('home').classList.add('hidden');$('result').classList.add('hidden');$('quiz').classList.remove('hidden');showQuestion(); }
     function showQuestion(){ answered=false; const q=round[index]; $('categoryLabel').textContent=`${q.i} ${q.c}`;$('counter').textContent=`DOMANDA ${index+1} DI ${round.length}`;$('question').textContent=q.q;$('progress').style.width=`${index/round.length*100}%`;$('tip').textContent='Scegli la risposta che ritieni corretta.';$('answers').innerHTML=q.a.map((a,i)=>`<button class="answer" data-i="${i}"><span>${String.fromCharCode(65+i)}</span>${a}</button>`).join('');document.querySelectorAll('.answer').forEach(b=>b.onclick=()=>answer(Number(b.dataset.i))); startTimer(); }
     function startTimer(){clearInterval(timerId);seconds=15;$('timer').textContent=seconds;timerId=setInterval(()=>{seconds--;$('timer').textContent=seconds;if(seconds<=0){clearInterval(timerId);answer(-1)}},1000)}
     function nextQuestion(){ $('explain').classList.add('hidden'); index++; index<round.length?showQuestion():finish(); }
