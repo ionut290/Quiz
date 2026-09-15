@@ -19,4 +19,45 @@ window.PATENTE_B_QUESTIONS.forEach(q=>{
   if(q.q.includes('semaforo')) q.img=localTrafficFigure('light');
 });
 
+
+// Genera una figura didattica locale per ogni domanda Patente B.
+const questionIllustration=(q,n)=>{
+  const t=q.q.toLowerCase();
+  let kind='road',title='SICUREZZA STRADALE',detail='GUIDA PRUDENTE',accent='#22d3ee';
+  if(t.includes('dare precedenza')){kind='yield';title='DARE PRECEDENZA';detail='RALLENTA E OSSERVA';accent='#dc2626'}
+  else if(t.includes('stop')){kind='stop';title='STOP';detail='ARRESTO OBBLIGATORIO';accent='#dc2626'}
+  else if(t.includes('telefono')){kind='phone';title='NO TELEFONO';detail='ATTENZIONE ALLA STRADA';accent='#f59e0b'}
+  else if(t.includes('cintura')||t.includes('bambini')){kind='belt';title='SISTEMI DI RITENUTA';detail='PROTEGGI GLI OCCUPANTI';accent='#22c55e'}
+  else if(t.includes('autostrada')||t.includes('corsia di emergenza')){kind='highway';title='AUTOSTRADA';detail='RISPETTA LE CORSIE';accent='#3b82f6'}
+  else if(t.includes('pedoni')||t.includes('strisce')){kind='pedestrian';title='PEDONI';detail='MASSIMA PRECAUZIONE';accent='#22c55e'}
+  else if(t.includes('sosta')||t.includes('parcheggiare')||t.includes('marciapiedi')||t.includes('passo carrabile')){kind='parking';title='SOSTA E FERMATA';detail='NON INTRALCIARE';accent='#f59e0b'}
+  else if(t.includes('incidente')||t.includes('soccorso')){kind='emergency';title='EMERGENZA';detail='PRESTA SOCCORSO';accent='#ef4444'}
+  else if(t.includes('pneumatic')||t.includes('ghiaccio')||t.includes('pioggia')||t.includes('abs')){kind='tyre';title='ADERENZA';detail='CONTROLLA IL VEICOLO';accent='#8b5cf6'}
+  else if(t.includes('fari')||t.includes('fendinebbia')||t.includes('semaforo')||t.includes('clacson')){kind='lights';title='SEGNALAZIONI';detail='USA LE LUCI CORRETTAMENTE';accent='#facc15'}
+  else if(t.includes('sorpass')||t.includes('corsia')){kind='overtake';title='SORPASSO';detail='VERIFICA LA VISIBILITÀ';accent='#3b82f6'}
+  else if(t.includes('carico')||t.includes('revisione')||t.includes('rca')){kind='vehicle';title='VEICOLO';detail='SICUREZZA E RESPONSABILITÀ';accent='#14b8a6'}
+  else if(t.includes('casco')||t.includes('motociclo')){kind='helmet';title='CASCO';detail='OBBLIGATORIO IN MOTO';accent='#ec4899'}
+  else if(t.includes('velocità')||t.includes('distanza')){kind='speed';title='VELOCITÀ';detail='MANTIENI LA DISTANZA';accent='#f97316'}
+  const drawings={
+    yield:'<path d="M160 50 270 215H50Z" fill="white" stroke="#dc2626" stroke-width="18" stroke-linejoin="round"/><path d="M160 87 232 198H88Z" fill="white"/>',
+    stop:'<path d="M92 42h136l50 50v76l-50 50H92l-50-50V92Z" fill="#dc2626" stroke="white" stroke-width="8"/><text x="160" y="151" text-anchor="middle" font-size="34" font-weight="900" fill="white">STOP</text>',
+    phone:'<rect x="119" y="45" width="82" height="145" rx="14" fill="#1f2937" stroke="#f59e0b" stroke-width="8"/><circle cx="160" cy="169" r="7" fill="#f59e0b"/><path d="M80 215 240 35" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>',
+    belt:'<circle cx="160" cy="77" r="27" fill="#f8fafc"/><path d="M112 180q8-66 48-66t48 66" fill="none" stroke="#f8fafc" stroke-width="18"/><path d="M120 100 205 190M200 100 145 165" stroke="#22c55e" stroke-width="14" stroke-linecap="round"/>',
+    highway:'<path d="M90 215 135 45M230 215 185 45" stroke="#f8fafc" stroke-width="28"/><path d="M160 215V45" stroke="#facc15" stroke-width="8" stroke-dasharray="20 16"/>',
+    pedestrian:'<circle cx="160" cy="65" r="20" fill="#f8fafc"/><path d="m160 88-28 62m28-62 30 62m-30-38-38 30m38-30 38 30" stroke="#22c55e" stroke-width="13" stroke-linecap="round"/>',
+    parking:'<rect x="92" y="42" width="136" height="136" rx="18" fill="#2563eb"/><text x="160" y="143" text-anchor="middle" font-size="92" font-weight="900" fill="white">P</text><path d="M80 215 240 35" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>',
+    emergency:'<rect x="75" y="85" width="170" height="105" rx="14" fill="#ef4444"/><path d="M145 105h30v30h30v30h-30v30h-30v-30h-30v-30h30Z" fill="white"/>',
+    tyre:'<circle cx="160" cy="125" r="70" fill="#1f2937" stroke="#8b5cf6" stroke-width="14"/><circle cx="160" cy="125" r="28" fill="#cbd5e1"/><path d="M160 55v28m0 84v28M90 125h28m84 0h28" stroke="#cbd5e1" stroke-width="10"/>',
+    lights:'<rect x="115" y="35" width="90" height="185" rx="22" fill="#263244"/><circle cx="160" cy="78" r="25" fill="#ef4444"/><circle cx="160" cy="128" r="25" fill="#facc15"/><circle cx="160" cy="178" r="25" fill="#22c55e"/>',
+    overtake:'<path d="M95 215 130 45M225 215 190 45" stroke="#f8fafc" stroke-width="25"/><path d="M160 215V45" stroke="#facc15" stroke-width="7" stroke-dasharray="20 16"/><path d="m120 95 40-35 40 35" fill="none" stroke="#3b82f6" stroke-width="12"/>',
+    vehicle:'<rect x="70" y="105" width="180" height="70" rx="18" fill="#14b8a6"/><path d="m100 105 28-40h64l28 40" fill="#14b8a6"/><circle cx="112" cy="180" r="19" fill="#111827"/><circle cx="208" cy="180" r="19" fill="#111827"/>',
+    helmet:'<path d="M85 145a75 75 0 0 1 150 0v25H85Z" fill="#ec4899"/><path d="M85 145h150" stroke="white" stroke-width="10"/><path d="M155 170v35" stroke="#f8fafc" stroke-width="10"/>',
+    speed:'<circle cx="160" cy="130" r="76" fill="white" stroke="#f97316" stroke-width="15"/><path d="M160 130 210 92" stroke="#111827" stroke-width="10" stroke-linecap="round"/><text x="160" y="162" text-anchor="middle" font-size="28" font-weight="900" fill="#111827">50</text>',
+    road:'<path d="M80 220 125 35M240 220 195 35" stroke="#f8fafc" stroke-width="28"/><path d="M160 220V35" stroke="#facc15" stroke-width="8" stroke-dasharray="20 16"/><rect x="130" y="150" width="60" height="38" rx="8" fill="#22d3ee"/>'
+  };
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 280"><rect width="320" height="280" rx="24" fill="#eef4fb"/><rect x="20" y="20" width="280" height="215" rx="18" fill="#102a52"/>'+drawings[kind]+'<rect x="20" y="235" width="280" height="45" rx="0" fill="'+accent+'"/><text x="160" y="255" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="800" fill="#07152f">'+title+'</text><text x="160" y="273" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#07152f">'+detail+'</text></svg>';
+  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+};
+window.PATENTE_B_QUESTIONS.forEach((q,n)=>{q.img=questionIllustration(q,n)});
+
 window.PATENTE_B_QUESTIONS.forEach(q=>{q.normattiva='https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:1992-04-30;285!vig=';});
