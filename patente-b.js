@@ -3,4 +3,20 @@ window.PATENTE_B_QUESTIONS = [["Il conducente deve regolare la velocità in rela
 
 window.PATENTE_B_QUESTIONS.forEach(q=>{  q.r=q.q.includes('telefono')?'Art. 173 Codice della Strada':q.q.includes('cintura')?'Art. 172 Codice della Strada':q.q.includes('STOP')||q.q.includes('precedenza')?'Art. 145 Codice della Strada':q.q.includes('velocità')?'Art. 141 Codice della Strada':q.q.includes('sosta')||q.q.includes('marciapiedi')||q.q.includes('passo carrabile')?'Art. 158 Codice della Strada':q.q.includes('sorpass')?'Art. 148 Codice della Strada':q.q.includes('autostrada')?'Art. 175 Codice della Strada':q.q.includes('fari')||q.q.includes('abbaglianti')||q.q.includes('fendinebbia')?'Art. 153 Codice della Strada':q.q.includes('alcol')?'Art. 186 Codice della Strada':q.q.includes('RCA')?'Art. 193 Codice della Strada':q.q.includes('revisione')?'Art. 80 Codice della Strada':q.q.includes('pedoni')?'Art. 191 Codice della Strada':q.q.includes('incidente')?'Art. 189 Codice della Strada':'Codice della Strada e norme di comportamento';  q.paragrafo=q.e;  if(q.q.includes('STOP')) q.img='https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Italian_traffic_signs_-_fermarsi_e_dare_precedenza.svg/240px-Italian_traffic_signs_-_fermarsi_e_dare_precedenza.svg.png';  if(q.q.includes('DARE PRECEDENZA')) q.img='https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Italian_traffic_signs_-_dare_precedenza.svg/240px-Italian_traffic_signs_-_dare_precedenza.svg.png';  if(q.q.includes('semaforo')) q.img='https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Italian_traffic_signs_-_semaforo.svg/240px-Italian_traffic_signs_-_semaforo.svg.png';});
 
+
+// Figure locali: non dipendono da collegamenti esterni e funzionano anche offline.
+const localTrafficFigure=kind=>{
+  const svg=kind==='yield'
+    ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260"><rect width="320" height="260" rx="24" fill="white"/><path d="M160 25 292 232H28Z" fill="#fff" stroke="#d71920" stroke-width="22" stroke-linejoin="round"/><path d="M160 70 245 205H75Z" fill="white"/><text x="160" y="151" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#111827">DARE</text><text x="160" y="178" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#111827">PRECEDENZA</text></svg>'
+    : kind==='stop'
+      ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260"><rect width="320" height="260" rx="24" fill="white"/><path d="M91 35h138l56 56v78l-56 56H91l-56-56V91Z" fill="#d71920" stroke="#fff" stroke-width="10"/><text x="160" y="143" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="900" fill="white">STOP</text></svg>'
+      : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260"><rect width="320" height="260" rx="24" fill="white"/><rect x="108" y="20" width="104" height="220" rx="22" fill="#263244"/><circle cx="160" cy="70" r="28" fill="#ef4444"/><circle cx="160" cy="130" r="28" fill="#facc15"/><circle cx="160" cy="190" r="28" fill="#22c55e"/></svg>';
+  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+};
+window.PATENTE_B_QUESTIONS.forEach(q=>{
+  if(q.q.includes('STOP')) q.img=localTrafficFigure('stop');
+  if(q.q.includes('DARE PRECEDENZA')) q.img=localTrafficFigure('yield');
+  if(q.q.includes('semaforo')) q.img=localTrafficFigure('light');
+});
+
 window.PATENTE_B_QUESTIONS.forEach(q=>{q.normattiva='https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:1992-04-30;285!vig=';});
